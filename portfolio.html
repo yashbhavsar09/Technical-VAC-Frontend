@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yash Bhavsar — Backend &amp; Agentic AI Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board: #0A3622;
+    --board-2: #0D4128;
+    --board-3: #0F4A2E;
+    --copper: #D4A24C;
+    --copper-dim: rgba(212,162,76,0.32);
+    --silk: #EAE7D6;
+    --silk-dim: #8FAF9B;
+    --trace: #1E5E3C;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--board);
+    color: var(--silk);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 1.75;
+    background-image:
+      radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  h1,h2,h3{
+    font-family: 'Silkscreen', monospace;
+    font-weight: 700;
+    margin: 0;
+    color: var(--silk);
+    letter-spacing: 0.01em;
+  }
+
+  a{ color: var(--copper); text-decoration: none; border-bottom: 1px solid var(--copper-dim); }
+  a:hover{ border-bottom-color: var(--copper); }
+
+  .wrap{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 28px 0 64px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ---------- VIA RAIL (nav) ---------- */
+  #rail{
+    position: fixed;
+    left: 22px; top: 0; bottom: 0;
+    width: 24px;
+    z-index: 20;
+    display: none;
+  }
+  #rail .trace{ position: absolute; left: 11px; top: 40px; bottom: 40px; width: 2px; background: var(--trace); }
+  #rail .via{
+    position: absolute; left: 4px;
+    width: 16px; height: 16px;
+    border: 2px solid var(--copper);
+    background: var(--board);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  #rail .via:hover{ background: var(--copper-dim); }
+  #rail .via::after{ content: attr(data-label); position: absolute; left: 24px; top: -3px; font-family:'IBM Plex Mono'; font-size: 10px; color: var(--silk-dim); white-space: nowrap; opacity: 0; transition: opacity .15s ease; }
+  #rail .via:hover::after{ opacity: 1; }
+  @media (min-width: 860px){ #rail{ display:block; } }
+
+  /* ---------- HEADER STRIP ---------- */
+  .strip{
+    border-bottom: 1px solid var(--trace);
+    padding: 14px 0;
+    font-size: 11px;
+    color: var(--silk-dim);
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .strip b{ color: var(--copper); }
+
+  /* ---------- HERO: chip pinout ---------- */
+  .hero{ padding: 52px 0 40px; }
+  .hero .kicker{ font-size: 11px; color: var(--copper); letter-spacing: 0.08em; margin-bottom: 16px; }
+  .hero h1{ font-size: clamp(28px, 5.5vw, 42px); line-height: 1.3; }
+  .hero p.lede{ margin-top: 20px; max-width: 60ch; color: var(--silk-dim); font-size: 14px; }
+
+  .hero-links{ margin-top: 30px; display:flex; flex-wrap: wrap; gap: 10px; }
+  .hero-links a{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 9px 15px;
+    border: 1px solid var(--trace);
+    color: var(--silk-dim);
+    transition: all .15s ease;
+  }
+  .hero-links a:hover{ border-color: var(--copper); color: var(--copper); }
+  .hero-links a.primary{ border-color: var(--copper); background: var(--copper); color: var(--board); }
+  .hero-links a.primary:hover{ opacity: .88; color: var(--board); }
+
+  .chip{
+    margin-top: 48px;
+    position: relative;
+  }
+  .chip svg{ width: 100%; height: auto; display:block; }
+  .pin-rect{ fill: var(--board-2); stroke: var(--trace); stroke-width: 1.2; }
+  .pin-lead{ stroke: var(--copper); stroke-width: 2; opacity: 0; animation: leadon .35s ease forwards; }
+  .pin-dot{ fill: var(--copper); opacity: 0; animation: leadon .3s ease forwards; }
+  .pin-label{ font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: var(--silk-dim); opacity: 0; animation: leadon .4s ease forwards; }
+  .chip-body{ fill: var(--board-3); stroke: var(--copper); stroke-width: 1.4; }
+  .chip-notch{ fill: var(--board); }
+  .chip-label{ font-family: 'Silkscreen', monospace; font-size: 13px; fill: var(--silk); }
+  @keyframes leadon{ to{ opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .pin-lead, .pin-dot, .pin-label{ animation: none !important; opacity: 1; }
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding: 42px 0; border-top: 1px dashed var(--trace); }
+  .sec-head{ display:flex; align-items: baseline; gap: 12px; margin-bottom: 28px; }
+  .sec-head .desig{ font-family: 'Silkscreen', monospace; font-size: 13px; color: var(--copper); }
+  .sec-head h2{ font-size: 15px; letter-spacing: 0.04em; color: var(--silk-dim); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+  .summary p{ max-width: 66ch; color: var(--silk-dim); }
+
+  /* footprint panel used across sections */
+  .footprint{
+    position: relative;
+    border: 1px dashed var(--trace);
+    padding: 20px 22px;
+  }
+  .footprint::before, .footprint::after{
+    content:""; position:absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--copper);
+  }
+  .footprint::before{ top: -4px; left: -4px; }
+  .footprint::after{ bottom: -4px; right: -4px; }
+
+  /* ---------- SKILLS ---------- */
+  .skill-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  .skill-grid .footprint .k{ font-family:'Silkscreen', monospace; font-size: 11px; color: var(--copper); display:block; margin-bottom: 10px; }
+  .skill-grid .footprint .v{ color: var(--silk-dim); font-size: 13px; line-height: 1.8; }
+  @media (max-width: 600px){ .skill-grid{ grid-template-columns: 1fr; } }
+
+  /* ---------- EXPERIENCE ---------- */
+  .exp .lhead{ display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .exp h3{ font-size: 14px; font-family:'IBM Plex Mono', monospace; font-weight: 600; color: var(--silk); }
+  .exp .date{ font-size: 11.5px; color: var(--silk-dim); }
+  .exp .role{ font-size: 12px; color: var(--copper); margin-top: 6px; display:block; }
+  .exp p{ margin-top: 14px; color: var(--silk-dim); max-width: 62ch; font-size: 13px; }
+
+  /* ---------- PROJECTS ---------- */
+  .projects{ display:grid; gap: 16px; }
+  .proj .phead{ display:flex; justify-content: space-between; align-items:baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .proj .pname{ font-size: 13.5px; font-weight: 600; color: var(--silk); }
+  .proj .ptag{ font-family:'Silkscreen', monospace; font-size: 11px; color: var(--copper); }
+  .proj .pstack{ font-size: 11.5px; color: var(--silk-dim); }
+  .proj p, .proj ul{ color: var(--silk-dim); font-size: 13px; margin: 0; padding-left: 18px; }
+  .proj p{ padding-left: 0; }
+  .proj li{ margin-bottom: 4px; }
+  .proj .pfoot{ margin-top: 10px; font-size: 12px; }
+
+  /* ---------- ACHIEVEMENTS ---------- */
+  .ach{ list-style: none; margin:0; padding:0; display:grid; gap: 10px; }
+  .ach li{ display:flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; color: var(--silk-dim); font-size: 13px; }
+  .ach li::before{ content: "◆"; color: var(--copper); margin-right: 8px; font-size: 10px; }
+  .ach .badge{ color: var(--copper); font-size: 11.5px; font-family:'IBM Plex Mono', monospace; }
+
+  /* ---------- EDUCATION ---------- */
+  .edu{ display:grid; gap: 16px; }
+  .edu-item h3{ font-size: 13.5px; font-family:'IBM Plex Mono', monospace; font-weight: 600; color: var(--silk); }
+  .edu-item .meta{ color: var(--silk-dim); font-size: 12.5px; margin-top: 6px; }
+  .edu-item .score{ color: var(--copper); font-size: 12px; margin-top: 4px; display:block; }
+
+  /* ---------- FOOTER ---------- */
+  footer{ border-top: 1px dashed var(--trace); padding: 46px 0 60px; }
+  footer .desig{ font-family:'Silkscreen', monospace; font-size: 12px; color: var(--copper); }
+  footer h2{ font-size: 19px; margin-top: 10px; }
+  footer p{ color: var(--silk-dim); margin-top: 10px; max-width: 46ch; font-size: 13px; }
+  .foot-links{ margin-top: 22px; display:flex; flex-wrap: wrap; gap: 10px; font-size: 12.5px; }
+  .foot-links a{ border: 1px solid var(--trace); padding: 8px 13px; color: var(--silk-dim); transition: all .15s ease; }
+  .foot-links a:hover{ border-color: var(--copper); color: var(--copper); }
+  .gnd{ margin-top: 40px; text-align:center; font-family:'Silkscreen', monospace; font-size: 10px; color: var(--silk-dim); letter-spacing: 0.15em; }
+
+  ::selection{ background: var(--copper-dim); color: var(--silk); }
+  a:focus-visible, button:focus-visible{ outline: 2px solid var(--copper); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div id="rail">
+  <div class="trace"></div>
+  <div class="via" style="top:8%" data-label="summary" onclick="document.getElementById('s-summary').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:22%" data-label="skills" onclick="document.getElementById('s-skills').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:36%" data-label="experience" onclick="document.getElementById('s-exp').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:52%" data-label="projects" onclick="document.getElementById('s-proj').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:68%" data-label="achievements" onclick="document.getElementById('s-ach').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:80%" data-label="education" onclick="document.getElementById('s-edu').scrollIntoView({behavior:'smooth'})"></div>
+  <div class="via" style="top:92%" data-label="contact" onclick="document.getElementById('s-contact').scrollIntoView({behavior:'smooth'})"></div>
+</div>
+
+<div class="wrap strip">
+  <span><b>BOARD:</b> yash_bhavsar_v1</span>
+  <span><b>REV:</b> A1</span>
+  <span><b>STATUS:</b> open to offers</span>
+</div>
+
+<main class="wrap">
+
+  <section class="hero" style="border-top:none;">
+    <div class="kicker">IC1 · PRIMARY UNIT</div>
+    <h1>YASH BHAVSAR</h1>
+    <p class="lede">B.Tech CS student building backend systems and agentic AI workflows — FastAPI services, REST APIs, and LLM-orchestrated multi-agent pipelines. Currently going deep on autonomous agent design.</p>
+
+    <div class="hero-links">
+      <a class="primary" href="mailto:yashbhavsaar09@gmail.com">Email</a>
+      <a href="tel:+919587651515">+91-9587651515</a>
+      <a href="https://www.linkedin.com/in/yash-bhavsar-0a9b753b3" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/yashbhavsar09" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://leetcode.com/u/yashbhavsar09/" target="_blank" rel="noopener">LeetCode</a>
+    </div>
+
+    <div class="chip">
+      <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- chip body -->
+        <rect class="chip-body" x="220" y="55" width="200" height="110" rx="4"/>
+        <circle class="chip-notch" cx="240" cy="75" r="6"/>
+        <text class="chip-label" x="320" y="115" text-anchor="middle">IC1</text>
+        <text class="pin-label" x="320" y="135" text-anchor="middle" style="animation-delay:1.3s">YASH_BHAVSAR</text>
+
+        <!-- left pins -->
+        <line class="pin-lead" x1="220" y1="80" x2="150" y2="80" style="animation-delay:.1s"/>
+        <rect class="pin-rect" x="130" y="74" width="24" height="12" style="animation-delay:.1s;opacity:0;animation:leadon .3s ease forwards .1s"/>
+        <text class="pin-label" x="120" y="83" text-anchor="end" style="animation-delay:.2s">Python</text>
+
+        <line class="pin-lead" x1="220" y1="110" x2="150" y2="110" style="animation-delay:.3s"/>
+        <rect class="pin-rect" x="130" y="104" width="24" height="12" style="opacity:0;animation:leadon .3s ease forwards .3s"/>
+        <text class="pin-label" x="120" y="113" text-anchor="end" style="animation-delay:.4s">FastAPI</text>
+
+        <line class="pin-lead" x1="220" y1="140" x2="150" y2="140" style="animation-delay:.5s"/>
+        <rect class="pin-rect" x="130" y="134" width="24" height="12" style="opacity:0;animation:leadon .3s ease forwards .5s"/>
+        <text class="pin-label" x="120" y="143" text-anchor="end" style="animation-delay:.6s">DSA</text>
+
+        <!-- right pins -->
+        <line class="pin-lead" x1="420" y1="80" x2="490" y2="80" style="animation-delay:.7s"/>
+        <rect class="pin-rect" x="486" y="74" width="24" height="12" style="opacity:0;animation:leadon .3s ease forwards .7s"/>
+        <text class="pin-label" x="520" y="83" text-anchor="start" style="animation-delay:.8s">Agentic AI</text>
+
+        <line class="pin-lead" x1="420" y1="110" x2="490" y2="110" style="animation-delay:.9s"/>
+        <rect class="pin-rect" x="486" y="104" width="24" height="12" style="opacity:0;animation:leadon .3s ease forwards .9s"/>
+        <text class="pin-label" x="520" y="113" text-anchor="start" style="animation-delay:1s">LLM tool-calling</text>
+
+        <line class="pin-lead" x1="420" y1="140" x2="490" y2="140" style="animation-delay:1.1s"/>
+        <rect class="pin-rect" x="486" y="134" width="24" height="12" style="opacity:0;animation:leadon .3s ease forwards 1.1s"/>
+        <text class="pin-label" x="520" y="143" text-anchor="start" style="animation-delay:1.2s">REST APIs</text>
+      </svg>
+    </div>
+  </section>
+
+  <section id="s-summary">
+    <div class="sec-head"><span class="desig">U1</span><h2>SUMMARY</h2></div>
+    <div class="summary footprint">
+      <p>B.Tech Computer Science student with strong foundations in Data Structures &amp; Algorithms and hands-on experience building and deploying backend systems and AI-powered applications. Experienced in FastAPI, PostgreSQL, and REST API development. Currently diving deeper into Agentic AI, exploring multi-agent workflows and autonomous systems.</p>
+    </div>
+  </section>
+
+  <section id="s-skills">
+    <div class="sec-head"><span class="desig">R1</span><h2>SKILLS</h2></div>
+    <div class="skill-grid">
+      <div class="footprint"><span class="k">LANGUAGES</span><div class="v">Python, C++</div></div>
+      <div class="footprint"><span class="k">CORE CS</span><div class="v">DSA, OOPS, DBMS</div></div>
+      <div class="footprint"><span class="k">BACKEND &amp; SYSTEMS</span><div class="v">FastAPI, REST APIs, SQLAlchemy</div></div>
+      <div class="footprint"><span class="k">AI / ML</span><div class="v">NumPy, Pandas, Scikit-learn, EDA, Data Preprocessing, NLP</div></div>
+    </div>
+  </section>
+
+  <section id="s-exp">
+    <div class="sec-head"><span class="desig">Q1</span><h2>EXPERIENCE</h2></div>
+    <div class="exp footprint">
+      <div class="lhead">
+        <h3>GRRAS Solutions Pvt. Ltd.</h3>
+        <span class="date">Jun 2026 — Jul 2026 · Remote</span>
+      </div>
+      <span class="role">Agentic AI Intern</span>
+      <p>Built hands-on Agentic AI projects during an internship focused on LLM-based autonomous systems — an AI email assistant, a web research agent, and a multi-agent collaboration system — designing agent workflows with LLM tool-calling and orchestration between cooperating agents.</p>
+    </div>
+  </section>
+
+  <section id="s-proj">
+    <div class="sec-head"><span class="desig">C1</span><h2>PROJECTS</h2></div>
+    <div class="projects">
+
+      <div class="proj footprint">
+        <div class="phead">
+          <span class="pname">LinkedIn Post Generator</span>
+          <span class="ptag">C1.1</span>
+        </div>
+        <div class="pstack" style="margin-bottom:8px;">Python · FastAPI · Groq API · Tavily</div>
+        <p>A simple AI-powered API that finds trending B.Tech topics and turns them into a ready-to-publish LinkedIn post — built with FastAPI + Tavily + Groq.</p>
+        <div class="pfoot"><a href="https://github.com/yashbhavsar09/Linkedin-Post-Generator" target="_blank" rel="noopener">view repo</a></div>
+      </div>
+
+      <div class="proj footprint">
+        <div class="phead">
+          <span class="pname">Real-Time Drowsiness Detection</span>
+          <span class="ptag">C1.2</span>
+        </div>
+        <div class="pstack" style="margin-bottom:8px;">Python · OpenCV · dlib · Computer Vision</div>
+        <ul>
+          <li>Built a real-time driver drowsiness detection system using facial landmark detection to track eye aspect ratio (EAR) and yawning patterns through a live webcam feed.</li>
+          <li>Implemented an audio alert mechanism triggered on detecting drowsiness, with an optimized frame-processing pipeline for low-latency real-time performance.</li>
+        </ul>
+      </div>
+
+      <div class="proj footprint">
+        <div class="phead">
+          <span class="pname">Online Library Management System</span>
+          <span class="ptag">C1.3</span>
+        </div>
+        <div class="pstack" style="margin-bottom:8px;">Java · MySQL · SDLC / SRS Documentation</div>
+        <p>Developed a library management system covering book inventory, member records, and issue/return tracking, with a relational database backend.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="s-ach">
+    <div class="sec-head"><span class="desig">D1</span><h2>ACHIEVEMENTS &amp; CERTIFICATIONS</h2></div>
+    <div class="footprint">
+      <ul class="ach">
+        <li><span>Google Cloud Digital Leader</span><span class="badge">Google Cloud</span></li>
+        <li><span>The Joy of Computing using Python</span><span class="badge">NPTEL · 91%</span></li>
+        <li><span>Enhancing Soft Skills and Personality</span><span class="badge">NPTEL · 89%</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="s-edu">
+    <div class="sec-head"><span class="desig">Y1</span><h2>EDUCATION</h2></div>
+    <div class="edu">
+      <div class="edu-item footprint">
+        <h3>B.Tech in Computer Science Engineering</h3>
+        <div class="meta">Poornima College of Engineering, Jaipur · 2024 — 2028</div>
+        <span class="score">CGPA: 8.99 / 10</span>
+      </div>
+      <div class="edu-item footprint">
+        <h3>CBSE (Class XII &amp; X)</h3>
+        <div class="meta">MPS Pratap Nagar, Jaipur, Rajasthan · 2024, 2022</div>
+        <span class="score">XII: 89.6% &nbsp;·&nbsp; X: 87%</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="s-contact">
+  <div class="wrap">
+    <span class="desig">J1 · CONNECTOR</span>
+    <h2>Let's build something.</h2>
+    <p>Open to backend and agentic AI internships / roles. Reach out directly — I reply fast.</p>
+    <div class="foot-links">
+      <a href="mailto:yashbhavsaar09@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/yash-bhavsar-0a9b753b3" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/yashbhavsar09" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://leetcode.com/u/yashbhavsar09/" target="_blank" rel="noopener">LeetCode</a>
+    </div>
+    <div class="gnd">— GND —</div>
+  </div>
+</footer>
+
+</body>
+</html>
