@@ -55,13 +55,13 @@ button{
     color: white;
     font-size: 15px;
 }
-button: hover{
+button:hover{
     opacity: 0.6;
-    cursor:not-allowed;
+    cursor: pointer;
 }
 
 .erro{
-    color: #b42; important;
+    color: #b42 !important;
 }
 
 .post-grid{
