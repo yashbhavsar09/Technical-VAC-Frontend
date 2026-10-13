@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VoltVan — Clickable Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F7F2;
+    --paper-dim:#EAEFE6;
+    --ink:#10231A;
+    --ink-soft:#4B5C52;
+    --forest:#1B4332;
+    --forest-deep:#0F2A1E;
+    --mid-green:#2D6A4F;
+    --amber:#FFC857;
+    --amber-deep:#E8A93B;
+    --red:#E0483F;
+    --line: rgba(16,35,26,0.10);
+    --map-bg:#E9EDE3;
+    --map-block:#DBE3D2;
+    --map-water:#CFE3EF;
+    --map-park:#CFE0C4;
+    --route-blue:#3B7DDE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--paper-dim);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:56px 24px 80px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .page-head{ max-width:560px; text-align:center; margin-bottom:34px; }
+  .page-head .eyebrow{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; color:var(--mid-green); margin:0 0 10px; }
+  .page-head h1{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:34px; line-height:1.1; margin:0 0 14px; color:var(--forest-deep); }
+  .page-head p{ font-size:15px; line-height:1.6; color:var(--ink-soft); margin:0; }
+  .hint{
+    margin-top:18px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:9px 16px;
+    border-radius:20px;
+    font-size:12.5px;
+    color:var(--forest-deep);
+    font-weight:600;
+  }
+
+  /* phone frame */
+  .phone{
+    width:300px;
+    height:630px;
+    background:var(--forest-deep);
+    border-radius:46px;
+    padding:12px;
+    box-shadow: 0 30px 60px -20px rgba(15,42,30,0.35);
+  }
+  .screen{
+    width:100%;
+    height:100%;
+    background:var(--paper);
+    border-radius:36px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:110px; height:22px; background:var(--forest-deep);
+    border-radius:0 0 16px 16px; z-index:5;
+  }
+  .statusbar{
+    height:46px; display:flex; align-items:flex-end; justify-content:space-between;
+    padding:0 22px 8px; font-size:12px; font-weight:600; color:var(--ink); flex-shrink:0;
+  }
+  .content{ flex:1; overflow:hidden; position:relative; }
+  .screen-view{ display:none; flex-direction:column; height:100%; overflow-y:auto; }
+  .screen-view.active{ display:flex; }
+  .navbar{
+    height:64px; flex-shrink:0; display:flex; align-items:center; justify-content:space-around;
+    background:var(--paper); border-top:1px solid var(--line); padding-bottom:6px;
+  }
+  .navitem{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-size:10px; color:var(--ink-soft); font-weight:600;
+    background:none; border:none; font-family:'Inter',sans-serif; padding:4px 10px;
+  }
+  .navitem.active{ color:var(--forest); }
+  .navdot{ width:20px;height:20px; border-radius:6px; }
+  .navitem.active .navdot{ background:var(--forest); }
+  .navitem:not(.active) .navdot{ background:var(--line); }
+
+  .subhead{ display:flex; align-items:center; gap:12px; padding:6px 20px 2px; flex-shrink:0; }
+  .back-btn{
+    width:32px;height:32px; border-radius:50%; background:var(--paper-dim);
+    border:none; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; color:var(--ink);
+  }
+  .subhead .htitle{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; margin:0; color:var(--forest-deep); }
+  .subhead .hsub{ font-size:11.5px; color:var(--ink-soft); margin:2px 0 0; }
+
+  /* ---- HOME ---- */
+  .home-top{ padding:6px 22px 16px; }
+  .greet-label{ font-size:12px; color:var(--ink-soft); margin:0 0 2px; }
+  .greet-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; margin:0; color:var(--forest-deep); }
+  .book-card{ margin:18px 18px 0; background:var(--forest); border-radius:22px; padding:20px; color:var(--paper); }
+  .book-card .t{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; margin:0 0 4px; }
+  .book-card .s{ font-size:12.5px; opacity:0.8; margin:0 0 16px; line-height:1.4; }
+  .book-btn{ background:var(--amber); color:var(--forest-deep); border:none; width:100%; padding:13px; border-radius:14px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; }
+  .quick-row{ display:flex; gap:10px; margin:16px 18px 0; }
+  .quick-chip{ flex:1; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px 10px; text-align:center; }
+  .quick-chip .ic{ font-size:17px; margin-bottom:4px; display:block; }
+  .quick-chip .l{ font-size:10.5px; font-weight:600; color:var(--ink); }
+  .quick-chip.sos{ background:rgba(224,72,63,0.08); border-color:rgba(224,72,63,0.25); }
+  .quick-chip.sos .l{ color:var(--red); }
+
+  /* ---- MAP (shared, Google-Maps style) ---- */
+  .map-frame{ margin:0 18px; }
+  .map-canvas{ position:relative; width:100%; height:190px; border-radius:22px; overflow:hidden; background:var(--map-bg); }
+  .map-canvas svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .pulse-ring{ transform-box:fill-box; transform-origin:center; animation:pulse 2.2s ease-out infinite; }
+  @keyframes pulse{ 0%{ transform:scale(0.6); opacity:0.55; } 70%{ transform:scale(2.4); opacity:0; } 100%{ opacity:0; } }
+  .map-chrome-zoom{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    background:var(--paper); border-radius:10px; box-shadow:0 3px 8px rgba(0,0,0,0.16);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .map-chrome-zoom button{ width:30px; height:28px; border:none; background:none; font-size:14px; color:var(--ink); font-weight:700; }
+  .map-chrome-zoom .divider{ height:1px; background:var(--line); }
+  .map-recenter{
+    position:absolute; right:10px; bottom:10px;
+    width:32px; height:32px; border-radius:50%; background:var(--paper);
+    border:none; box-shadow:0 3px 8px rgba(0,0,0,0.16); display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+  .map-badge{
+    position:absolute; left:10px; top:10px;
+    background:rgba(245,247,242,0.92); backdrop-filter:blur(2px);
+    border-radius:10px; padding:6px 10px; font-size:10.5px; font-weight:700; color:var(--forest-deep);
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  /* ---- CHECKOUT ---- */
+  .summary-card{ margin:14px 18px 0; border:1px solid var(--line); border-radius:18px; padding:16px; }
+  .summary-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:7px 0; color:var(--ink-soft); }
+  .summary-row span:last-child{ color:var(--ink); font-weight:600; }
+  .summary-row.total{ border-top:1px solid var(--line); margin-top:4px; padding-top:12px; font-size:14px; }
+  .summary-row.total span{ color:var(--forest-deep); font-weight:700; }
+  .pay-section-label{ margin:18px 18px 8px; font-size:11.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; }
+  .pay-method{ margin:0 18px 10px; display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px; padding:12px 14px; background:none; width:calc(100% - 36px); font-family:'Inter',sans-serif; }
+  .pay-method.selected{ border-color:var(--forest); background:rgba(27,67,50,0.05); }
+  .pay-method .radio{ width:16px;height:16px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; }
+  .pay-method.selected .radio{ border-color:var(--forest); background:var(--forest); }
+  .pay-method .m-ic{ font-size:16px; }
+  .pay-method .m-l{ font-size:12.5px; font-weight:600; flex:1; text-align:left; color:var(--ink); }
+  .pay-btn{ margin:20px 18px 0; background:var(--amber); color:var(--forest-deep); border:none; padding:14px; border-radius:14px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; width:calc(100% - 36px); }
+
+  /* ---- TRACKING ---- */
+  .eta-pill{ display:inline-block; background:var(--amber); color:var(--forest-deep); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; padding:5px 12px; border-radius:20px; margin:6px 0 10px 20px; }
+  .driver-card{ margin:16px 18px 0; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:16px; display:flex; align-items:center; gap:12px; }
+  .driver-avatar{ width:46px;height:46px; border-radius:50%; background:var(--mid-green); color:var(--paper); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; }
+  .driver-info{ flex:1; }
+  .driver-info .n{ font-weight:700; font-size:14px; margin:0; }
+  .driver-info .r{ font-size:11.5px; color:var(--ink-soft); margin:2px 0 0; }
+  .call-btn{ width:38px;height:38px; border-radius:50%; background:var(--forest); color:var(--paper); border:none; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .arrive-btn{ margin:14px 18px 0; background:var(--forest); color:var(--paper); border:none; padding:13px; border-radius:14px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; width:calc(100% - 36px); }
+
+  /* ---- CHARGING ---- */
+  .charge-wrap{ padding:16px 22px 0; display:flex; flex-direction:column; align-items:center; }
+  .charge-label{ font-size:12px; color:var(--ink-soft); margin:0 0 14px; }
+  .ring{ width:180px; height:180px; border-radius:50%; background: conic-gradient(var(--amber) 0deg 245deg, var(--line) 245deg 360deg); display:flex; align-items:center; justify-content:center; position:relative; }
+  .ring::after{ content:""; position:absolute; width:148px;height:148px; border-radius:50%; background:var(--paper); }
+  .ring-center{ position:relative; z-index:2; text-align:center; }
+  .ring-pct{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:32px; color:var(--forest-deep); }
+  .ring-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .stat-row{ display:flex; gap:10px; width:100%; margin-top:20px; }
+  .stat-box{ flex:1; background:var(--paper-dim); border-radius:16px; padding:12px; text-align:center; }
+  .stat-box .v{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; color:var(--forest-deep); }
+  .stat-box .l{ font-size:10px; color:var(--ink-soft); margin-top:2px; }
+  .green-note{ margin-top:16px; width:100%; background:rgba(45,106,79,0.08); border:1px solid rgba(45,106,79,0.22); border-radius:14px; padding:11px 14px; font-size:11.5px; color:var(--mid-green); font-weight:600; text-align:center; }
+  .stop-btn{ margin-top:18px; width:100%; background:transparent; border:1.5px solid var(--red); color:var(--red); font-weight:700; font-size:13px; padding:12px; border-radius:14px; font-family:'Space Grotesk',sans-serif; }
+
+  /* ---- GREENGRID ---- */
+  .gg-head{ padding:6px 22px 4px; }
+  .gg-title{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; margin:0; color:var(--forest-deep); }
+  .gg-sub{ font-size:12px; color:var(--ink-soft); margin:4px 0 0; }
+  .gg-card{ margin:14px 18px 0; background:var(--forest); border-radius:20px; padding:16px; color:var(--paper); }
+  .gg-card .t{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14.5px; margin:0 0 8px; }
+  .avatars{ display:flex; margin-bottom:10px; }
+  .avatars span{ width:28px;height:28px; border-radius:50%; background:var(--amber); color:var(--forest-deep); font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-left:-8px; border:2px solid var(--forest); }
+  .avatars span:first-child{ margin-left:0; }
+  .gg-card .d{ font-size:11.5px; opacity:0.82; line-height:1.5; margin:0 0 12px; }
+  .join-btn{ background:var(--amber); color:var(--forest-deep); border:none; padding:10px 16px; border-radius:12px; font-weight:700; font-size:12.5px; font-family:'Space Grotesk',sans-serif; }
+  .eco-card{ margin:14px 18px 0; border:1px solid var(--line); border-radius:20px; padding:16px; }
+  .eco-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .eco-row:last-child{ margin-bottom:0; }
+  .eco-row .l{ font-size:12px; color:var(--ink-soft); }
+  .eco-row .v{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13.5px; color:var(--forest-deep); }
+  .bar-bg{ height:6px; background:var(--paper-dim); border-radius:4px; margin-top:16px; overflow:hidden; }
+  .bar-fill{ height:100%; width:68%; background:var(--amber); border-radius:4px; }
+
+  /* ---- PLANS ---- */
+  .plan-card{ margin:14px 18px 0; border:1.5px solid var(--line); border-radius:20px; padding:16px; position:relative; }
+  .plan-card.reco{ border-color:var(--forest); background:rgba(27,67,50,0.04); }
+  .plan-badge{ position:absolute; top:-10px; right:16px; background:var(--amber); color:var(--forest-deep); font-size:10px; font-weight:700; padding:4px 10px; border-radius:20px; }
+  .plan-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; margin:0 0 2px; }
+  .plan-price{ font-size:12px; color:var(--ink-soft); margin:0 0 10px; }
+  .plan-price b{ color:var(--forest-deep); font-size:16px; font-family:'Space Grotesk',sans-serif; }
+  .plan-feat{ font-size:11.5px; color:var(--ink-soft); margin:5px 0; padding-left:18px; position:relative; }
+  .plan-feat::before{ content:"✓"; position:absolute; left:0; color:var(--mid-green); font-weight:700; }
+  .plan-btn{ margin-top:12px; width:100%; background:var(--forest); color:var(--paper); border:none; padding:10px; border-radius:12px; font-weight:700; font-size:12.5px; font-family:'Space Grotesk',sans-serif; }
+  .plan-card.reco .plan-btn{ background:var(--amber); color:var(--forest-deep); }
+
+  /* ---- PROFILE ---- */
+  .profile-top{ padding:10px 22px 0; display:flex; align-items:center; gap:14px; }
+  .profile-avatar{ width:56px;height:56px; border-radius:50%; background:var(--forest); color:var(--paper); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; }
+  .profile-name{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; margin:0; color:var(--forest-deep); }
+  .profile-meta{ font-size:11.5px; color:var(--ink-soft); margin:3px 0 0; }
+  .wallet-card{ margin:16px 18px 0; background:var(--forest); border-radius:18px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; color:var(--paper); }
+  .wallet-card .w-l{ font-size:11px; opacity:0.8; }
+  .wallet-card .w-v{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; margin-top:2px; }
+  .wallet-card .w-btn{ background:var(--amber); color:var(--forest-deep); border:none; font-size:11px; font-weight:700; padding:7px 12px; border-radius:10px; }
+  .menu-row{ margin:14px 18px 0; display:flex; align-items:center; justify-content:space-between; padding:13px 14px; border:1px solid var(--line); border-radius:14px; background:none; width:calc(100% - 36px); font-family:'Inter',sans-serif; }
+  .menu-row .m-l{ font-size:12.5px; font-weight:600; color:var(--ink); }
+  .menu-row .m-a{ font-size:12px; color:var(--ink-soft); }
+  .orders-label{ margin:18px 18px 8px; font-size:11.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; }
+  .order-item{ margin:0 18px 8px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding-bottom:10px; }
+  .order-icon{ width:36px;height:36px; border-radius:10px; background:var(--paper-dim); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .order-info{ flex:1; }
+  .order-info .o-t{ font-size:12.5px; font-weight:600; margin:0; }
+  .order-info .o-s{ font-size:10.5px; color:var(--ink-soft); margin:2px 0 0; }
+  .order-amt{ text-align:right; }
+  .order-amt .o-p{ font-size:12.5px; font-weight:700; color:var(--forest-deep); }
+  .order-amt .o-tag{ font-size:9.5px; font-weight:700; margin-top:2px; }
+  .order-amt .o-tag.done{ color:var(--mid-green); }
+  .order-amt .o-tag.cancel{ color:var(--red); }
+  .bottom-pad{ height:14px; }
+</style>
+</head>
+<body>
+
+  <div class="page-head">
+    <p class="eyebrow">VoltVan — clickable prototype</p>
+    <h1>Tap around like it's a real app.</h1>
+    <p>Book a van, pay, watch it arrive on a live map, charge, and check your order history — all in one phone.</p>
+  </div>
+  <div class="hint">👆 Tap "Book this van" to start the flow</div>
+
+  <div style="height:30px"></div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span>●●● 5G  ⌁ 82%</span></div>
+
+      <div class="content">
+
+        <!-- HOME -->
+        <div class="screen-view active" id="view-home">
+          <div class="home-top">
+            <p class="greet-label">Good evening</p>
+            <p class="greet-name">Yash</p>
+          </div>
+          <div class="map-frame">
+            <div class="map-canvas">
+              <svg viewBox="0 0 280 190" preserveAspectRatio="xMidYMid slice">
+                <rect width="280" height="190" fill="var(--map-bg)"/>
+                <path d="M230,-10 Q285,15 280,55 Q250,45 218,15 Z" fill="var(--map-water)"/>
+                <ellipse cx="42" cy="165" rx="55" ry="28" fill="var(--map-park)"/>
+                <g stroke="rgba(16,35,26,0.14)" stroke-width="9" stroke-linecap="round">
+                  <line x1="0" y1="45" x2="280" y2="45"/>
+                  <line x1="0" y1="110" x2="280" y2="110"/>
+                  <line x1="0" y1="165" x2="280" y2="165"/>
+                  <line x1="55" y1="0" x2="55" y2="190"/>
+                  <line x1="140" y1="0" x2="140" y2="190"/>
+                  <line x1="225" y1="0" x2="225" y2="190"/>
+                  <line x1="0" y1="190" x2="280" y2="15"/>
+                </g>
+                <g stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round">
+                  <line x1="0" y1="45" x2="280" y2="45"/>
+                  <line x1="0" y1="110" x2="280" y2="110"/>
+                  <line x1="0" y1="165" x2="280" y2="165"/>
+                  <line x1="55" y1="0" x2="55" y2="190"/>
+                  <line x1="140" y1="0" x2="140" y2="190"/>
+                  <line x1="225" y1="0" x2="225" y2="190"/>
+                </g>
+                <line x1="0" y1="190" x2="280" y2="15" stroke="#FFF3D6" stroke-width="6" stroke-linecap="round"/>
+                <rect x="68" y="58" width="48" height="34" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <rect x="156" y="58" width="42" height="34" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <rect x="68" y="118" width="48" height="34" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <rect x="156" y="118" width="42" height="34" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <g>
+                  <circle class="pulse-ring" cx="100" cy="120" r="9" fill="var(--route-blue)"/>
+                  <circle cx="100" cy="120" r="8" fill="#fff"/>
+                  <circle cx="100" cy="120" r="6" fill="var(--route-blue)"/>
+                </g>
+                <g>
+                  <circle cx="190" cy="65" r="15" fill="var(--amber)" stroke="#fff" stroke-width="3"/>
+                  <text x="190" y="71" font-size="15" text-anchor="middle">🚐</text>
+                </g>
+              </svg>
+              <div class="map-badge">📍 Vaishali Nagar</div>
+              <div class="map-chrome-zoom"><button>+</button><div class="divider"></div><button>−</button></div>
+              <button class="map-recenter">◎</button>
+            </div>
+          </div>
+          <div class="book-card">
+            <p class="t">Nearest van — 12 min away</p>
+            <p class="s">Vaishali Nagar, Jaipur · DC fast charger · ₹14/kWh</p>
+            <button class="book-btn" onclick="goTo('view-checkout','bookings')">Book this van</button>
+          </div>
+          <div class="quick-row">
+            <div class="quick-chip"><span class="ic">📅</span><span class="l">Schedule</span></div>
+            <div class="quick-chip" onclick="goTo('view-plans','profile')"><span class="ic">🔁</span><span class="l">Subscribe</span></div>
+            <div class="quick-chip sos"><span class="ic">🆘</span><span class="l">SOS</span></div>
+          </div>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- CHECKOUT -->
+        <div class="screen-view" id="view-checkout">
+          <div class="subhead">
+            <button class="back-btn" onclick="goTo('view-home','home')">←</button>
+            <div><p class="htitle">Confirm & pay</p><p class="hsub">Vaishali Nagar van · DC fast charger</p></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-row"><span>Estimated charge</span><span>~25 kWh</span></div>
+            <div class="summary-row"><span>Rate</span><span>₹14/kWh</span></div>
+            <div class="summary-row"><span>Doorstep visit fee</span><span>₹99</span></div>
+            <div class="summary-row"><span>GreenGrid batch discount</span><span>−₹40</span></div>
+            <div class="summary-row total"><span>Est. total</span><span>₹409</span></div>
+          </div>
+          <p class="pay-section-label">Pay with</p>
+          <button class="pay-method selected"><div class="radio"></div><span class="m-ic">📱</span><span class="m-l">UPI — yash@okhdfc</span></button>
+          <button class="pay-method"><div class="radio"></div><span class="m-ic">💳</span><span class="m-l">HDFC Debit •• 4471</span></button>
+          <button class="pay-method"><div class="radio"></div><span class="m-ic">👛</span><span class="m-l">VoltVan Wallet — ₹120</span></button>
+          <button class="pay-btn" onclick="goTo('view-tracking','bookings')">Pay ₹409 & confirm</button>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- TRACKING -->
+        <div class="screen-view" id="view-tracking">
+          <div class="subhead">
+            <button class="back-btn" onclick="goTo('view-home','home')">←</button>
+            <div><p class="htitle">Van is on the way</p><p class="hsub">Ramesh · Van #JP-014</p></div>
+          </div>
+          <div class="eta-pill">Arriving in 8 min</div>
+          <div class="map-frame">
+            <div class="map-canvas">
+              <svg viewBox="0 0 280 190" preserveAspectRatio="xMidYMid slice">
+                <rect width="280" height="190" fill="var(--map-bg)"/>
+                <ellipse cx="245" cy="20" rx="45" ry="26" fill="var(--map-water)"/>
+                <g stroke="rgba(16,35,26,0.14)" stroke-width="9" stroke-linecap="round">
+                  <line x1="0" y1="50" x2="280" y2="50"/>
+                  <line x1="0" y1="120" x2="280" y2="120"/>
+                  <line x1="60" y1="0" x2="60" y2="190"/>
+                  <line x1="150" y1="0" x2="150" y2="190"/>
+                  <line x1="230" y1="0" x2="230" y2="190"/>
+                </g>
+                <g stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round">
+                  <line x1="0" y1="50" x2="280" y2="50"/>
+                  <line x1="0" y1="120" x2="280" y2="120"/>
+                  <line x1="60" y1="0" x2="60" y2="190"/>
+                  <line x1="150" y1="0" x2="150" y2="190"/>
+                  <line x1="230" y1="0" x2="230" y2="190"/>
+                </g>
+                <rect x="75" y="62" width="55" height="38" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <rect x="165" y="62" width="45" height="38" rx="6" fill="var(--map-block)" opacity="0.6"/>
+                <path d="M 205,35 C 170,55 150,95 108,132" fill="none" stroke="var(--route-blue)" stroke-width="6" stroke-linecap="round" stroke-dasharray="1 14"/>
+                <path d="M 205,35 C 170,55 150,95 108,132" fill="none" stroke="var(--route-blue)" stroke-width="6" stroke-linecap="round" opacity="0.28"/>
+                <g>
+                  <circle class="pulse-ring" cx="108" cy="140" r="9" fill="var(--route-blue)"/>
+                  <circle cx="108" cy="140" r="8" fill="#fff"/>
+                  <circle cx="108" cy="140" r="6" fill="var(--route-blue)"/>
+                </g>
+                <g>
+                  <circle cx="205" cy="35" r="16" fill="var(--forest)" stroke="#fff" stroke-width="3"/>
+                  <text x="205" y="41" font-size="15" text-anchor="middle">🚐</text>
+                </g>
+              </svg>
+              <div class="map-badge">🕒 2.4 km away</div>
+              <div class="map-chrome-zoom"><button>+</button><div class="divider"></div><button>−</button></div>
+              <button class="map-recenter">◎</button>
+            </div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-avatar">RK</div>
+            <div class="driver-info"><p class="n">Ramesh K.</p><p class="r">4.9 ★ · Van #JP-014</p></div>
+            <button class="call-btn">📞</button>
+          </div>
+          <button class="arrive-btn" onclick="goTo('view-charging','bookings')">Van has arrived — start charging</button>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- CHARGING -->
+        <div class="screen-view" id="view-charging">
+          <div class="subhead">
+            <button class="back-btn" onclick="goTo('view-tracking','bookings')">←</button>
+            <div><p class="htitle">Charging</p><p class="hsub">Van #JP-014</p></div>
+          </div>
+          <div class="charge-wrap">
+            <div class="ring">
+              <div class="ring-center"><div class="ring-pct">68%</div><div class="ring-sub">14 min left</div></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-box"><div class="v">22.4</div><div class="l">kWh added</div></div>
+              <div class="stat-box"><div class="v">₹314</div><div class="l">running cost</div></div>
+              <div class="stat-box"><div class="v">41</div><div class="l">km range</div></div>
+            </div>
+            <div class="green-note">🌱 71% of this charge is from solar-stored energy</div>
+            <button class="stop-btn" onclick="goTo('view-profile','profile')">End session</button>
+          </div>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- GREENGRID -->
+        <div class="screen-view" id="view-greengrid">
+          <div class="gg-head"><p class="gg-title">GreenGrid</p><p class="gg-sub">Share a van, split the cost, cut the wait</p></div>
+          <div class="gg-card">
+            <p class="t">Vaishali Nagar batch — 6:30 PM</p>
+            <div class="avatars"><span>YS</span><span>PK</span><span>AM</span><span>+2</span></div>
+            <p class="d">5 EVs in your society are already booked for this slot. Join to save ~30% on the visit fee.</p>
+            <button class="join-btn">Join this batch</button>
+          </div>
+          <div class="eco-card">
+            <div class="eco-row"><span class="l">CO₂ saved this month</span><span class="v">18.4 kg</span></div>
+            <div class="eco-row"><span class="l">Renewable share</span><span class="v">68%</span></div>
+            <div class="bar-bg"><div class="bar-fill"></div></div>
+          </div>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- PLANS -->
+        <div class="screen-view" id="view-plans">
+          <div class="subhead">
+            <button class="back-btn" onclick="goTo('view-profile','profile')">←</button>
+            <div><p class="htitle">Choose a plan</p><p class="hsub">Switch or cancel anytime</p></div>
+          </div>
+          <div class="plan-card">
+            <p class="plan-name">Pay-as-you-go</p>
+            <p class="plan-price">No commitment · <b>₹14/kWh</b></p>
+            <p class="plan-feat">Book whenever you need</p>
+            <p class="plan-feat">Standard visit fee applies</p>
+            <button class="plan-btn" onclick="goTo('view-profile','profile')">Current plan</button>
+          </div>
+          <div class="plan-card reco">
+            <span class="plan-badge">Most popular</span>
+            <p class="plan-name">GreenGrid Saver</p>
+            <p class="plan-price"><b>₹599</b>/month</p>
+            <p class="plan-feat">8 visits/month included</p>
+            <p class="plan-feat">Zero visit fee</p>
+            <p class="plan-feat">Priority slot in batch charging</p>
+            <button class="plan-btn" onclick="goTo('view-profile','profile')">Switch to Saver</button>
+          </div>
+          <div class="plan-card">
+            <p class="plan-name">Unlimited Pro</p>
+            <p class="plan-price"><b>₹4,999</b>/year</p>
+            <p class="plan-feat">Unlimited visits</p>
+            <p class="plan-feat">Free emergency SOS rescue</p>
+            <p class="plan-feat">Dedicated support line</p>
+            <button class="plan-btn" onclick="goTo('view-profile','profile')">Go Pro</button>
+          </div>
+          <div class="bottom-pad"></div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="screen-view" id="view-profile">
+          <div class="profile-top">
+            <div class="profile-avatar">YS</div>
+            <div><p class="profile-name">Yash Sharma</p><p class="profile-meta">+91 98xxxxx210 · Tata Nexon EV</p></div>
+          </div>
+          <div class="wallet-card">
+            <div><div class="w-l">Wallet balance</div><div class="w-v">₹120</div></div>
+            <button class="w-btn">Add money</button>
+          </div>
+          <button class="menu-row" onclick="goTo('view-plans','profile')"><span class="m-l">Manage subscription</span><span class="m-a">Pay-as-you-go ›</span></button>
+          <p class="orders-label">My orders</p>
+          <div class="order-item">
+            <div class="order-icon">⚡</div>
+            <div class="order-info"><p class="o-t">Vaishali Nagar · 22.4 kWh</p><p class="o-s">Today, 6:42 PM</p></div>
+            <div class="order-amt"><div class="o-p">₹314</div><div class="o-tag done">Completed</div></div>
+          </div>
+          <div class="order-item">
+            <div class="order-icon">🆘</div>
+            <div class="order-info"><p class="o-t">SOS rescue · Tonk Road</p><p class="o-s">11 Sep, 8:05 PM</p></div>
+            <div class="order-amt"><div class="o-p">₹450</div><div class="o-tag done">Completed</div></div>
+          </div>
+          <div class="order-item">
+            <div class="order-icon">⚡</div>
+            <div class="order-info"><p class="o-t">Malviya Nagar · 18 kWh</p><p class="o-s">6 Sep, 7:10 PM</p></div>
+            <div class="order-amt"><div class="o-p">₹0</div><div class="o-tag cancel">Cancelled</div></div>
+          </div>
+          <div class="bottom-pad"></div>
+        </div>
+
+      </div>
+
+      <div class="navbar">
+        <button class="navitem active" id="nav-home" onclick="goTo('view-home','home')"><div class="navdot"></div>Home</button>
+        <button class="navitem" id="nav-bookings" onclick="goTo('view-tracking','bookings')"><div class="navdot"></div>Bookings</button>
+        <button class="navitem" id="nav-green" onclick="goTo('view-greengrid','green')"><div class="navdot"></div>GreenGrid</button>
+        <button class="navitem" id="nav-profile" onclick="goTo('view-profile','profile')"><div class="navdot"></div>Profile</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+function goTo(viewId, tab){
+  document.querySelectorAll('.screen-view').forEach(function(v){ v.classList.remove('active'); v.scrollTop = 0; });
+  document.getElementById(viewId).classList.add('active');
+  document.querySelectorAll('.navitem').forEach(function(n){ n.classList.remove('active'); });
+  if(tab){ document.getElementById('nav-'+tab).classList.add('active'); }
+}
+</script>
+
+</body>
+</html> 
