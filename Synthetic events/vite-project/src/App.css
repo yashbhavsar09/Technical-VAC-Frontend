@@ -1,0 +1,89 @@
+
+/* Universal Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* White Background */
+body {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main Container */
+.App {
+  width: 420px;
+  padding: 35px;
+  background-color: #eaf2ff;
+  border: 2px solid #2563eb;
+  border-radius: 10px;
+}
+
+/* Heading */
+.App h1 {
+  color: #1e40af;
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+/* Input Groups */
+form div {
+  margin-bottom: 20px;
+}
+
+/* Labels */
+label {
+  display: block;
+  color: #222;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* Input Fields */
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #999;
+  border-radius: 5px;
+  outline: none;
+  background-color: white;
+}
+
+/* Input Focus */
+input:focus {
+  border: 2px solid #2563eb;
+}
+
+/* Submit Button */
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* Button Hover */
+button:hover {
+  background-color: #1e40af;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .App {
+    width: 90%;
+    padding: 25px;
+  }
+}
