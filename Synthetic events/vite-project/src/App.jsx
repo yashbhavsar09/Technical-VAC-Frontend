@@ -1,35 +1,52 @@
-// function App() {
+// function App(){
 //     const handleClick = () => {
-//         alert('Button clicked!');
-//     }
-//     return(
+//         alert("button clicked");
+//     };
+
+
+//     return (
 //         <button onClick={handleClick}>
-//         Click Me
+//         Click me
 //         </button>
 //     );
-// }    
+
+
+// }
+
+// export default App;
+
+
+
+// // import { useState } from 'react';
+// // function App(){
+// //     const [name,setName] = useState('');
+// //     const handleChange = (e) =>{
+// //         setName(e.target.value);
+// //     };
+
+
+// //     return (
+// //         <input type = "text" value = {name}
+// //         onChange = {handleChange} placeholder="Enter Name"></input>
+
+// //     );
+
+
+// // }
+
+// // export default App;
+
+
 
 // import { useState } from 'react';
 // function App() {
-//   const [name, setName] = useState('');
-//   const handleChange = (e) => {
-//     setName(e.target.value);
-//   };
-//   return (
-    
-//       <input type="text" value={name} onChange={handleChange} placeholder="Enter your name" />
-   
-//   );
-// }  
-
-
-
-// import { useState } from 'react';
-// function App() {
-//   const {formState, setformData} = useState({name: '', email: ''});
+//   const [formState, setformData] = useState({name: '', email: ''});
 //   const handleChange = (e) => {
 //     const {name, value} = e.target;
-//     setformData({...prevformData, [name]: value});
+//     setformData((prevformData) => ({
+//     ...prevformData,
+//     [name]: value
+// }));
 //   };
 //   const handleSubmit = (e) => {
 //     e.preventDefault();
@@ -44,6 +61,9 @@
 //     </form>
 //   );
 // } 
+
+// export default App;
+
 
 
 
@@ -75,7 +95,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Contact Form</h1>
+      <h1>Simple React Form</h1>
 
       <form onSubmit={handleSubmit}>
         <div>
@@ -83,6 +103,7 @@ function App() {
           <input
             type="text"
             name="name"
+            placeholder="Name"
             value={formData.name}
             onChange={handleChange}
             required
@@ -94,6 +115,7 @@ function App() {
           <input
             type="email"
             name="email"
+            placeholder="Email"
             value={formData.email}
             onChange={handleChange}
             required
@@ -106,7 +128,4 @@ function App() {
   );
 }
 
-
 export default App;
-
-
